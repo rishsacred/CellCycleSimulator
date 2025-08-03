@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cell Cycle Simulator</title>
+    <title>Enhanced Cell Cycle Simulator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -111,8 +112,8 @@
 
         .cell {
             position: relative;
-            width: 250px;
-            height: 250px;
+            width: 280px;
+            height: 280px;
             background: radial-gradient(circle, #f5f5f5, #dcdcdc);
             border-radius: 50%;
             box-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
@@ -121,13 +122,13 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: all 0.5s ease;
+            transition: all 1s ease;
         }
 
         .nucleus {
             position: absolute;
-            width: 80px;
-            height: 80px;
+            width: 100px;
+            height: 100px;
             background: radial-gradient(circle, #ff9a76, #ff6b6b);
             border-radius: 50%;
             box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
@@ -139,8 +140,8 @@
         }
 
         .nucleolus {
-            width: 25px;
-            height: 25px;
+            width: 30px;
+            height: 30px;
             background: #ffd166;
             border-radius: 50%;
         }
@@ -177,11 +178,52 @@
 
         .centrosome {
             position: absolute;
-            width: 15px;
-            height: 15px;
+            width: 20px;
+            height: 20px;
             background: #ffd166;
             border-radius: 50%;
             z-index: 4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.5s ease;
+        }
+
+        .centriole {
+            width: 10px;
+            height: 10px;
+            background: #ff9a76;
+            border-radius: 50%;
+        }
+
+        .mitochondrion {
+            position: absolute;
+            width: 40px;
+            height: 20px;
+            background: linear-gradient(to right, #1a936f, #4ecdc4);
+            border-radius: 10px;
+            z-index: 3;
+            opacity: 0.7;
+        }
+
+        .er {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 3px solid #9b5de5;
+            border-radius: 50%;
+            z-index: 3;
+            opacity: 0.6;
+        }
+
+        .golgi {
+            position: absolute;
+            width: 40px;
+            height: 25px;
+            background: linear-gradient(to right, #f15bb5, #fee440);
+            border-radius: 5px;
+            z-index: 3;
+            opacity: 0.7;
         }
 
         .controls {
@@ -203,6 +245,10 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             flex: 1;
             min-width: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .btn:hover {
@@ -348,6 +394,66 @@
             color: #4ecdc4;
         }
 
+        .help-section {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .help-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            color: #ffd166;
+        }
+
+        .help-content {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            line-height: 1.6;
+        }
+
+        .help-content h3 {
+            color: #4ecdc4;
+            margin: 15px 0 10px;
+        }
+
+        .help-content ul {
+            padding-left: 25px;
+            margin-bottom: 15px;
+        }
+
+        .help-content li {
+            margin-bottom: 8px;
+        }
+
+        .organelles {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .organelle-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            width: 180px;
+        }
+
+        .organelle-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
         footer {
             text-align: center;
             margin-top: 40px;
@@ -369,14 +475,19 @@
             h1 {
                 font-size: 2.2rem;
             }
+            
+            .cell {
+                width: 220px;
+                height: 220px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Cell Cycle Simulator</h1>
-            <p class="subtitle">Explore the fascinating process of cell division with this interactive simulator. Watch mitosis and meiosis unfold with smooth animations and adjust variables to see their effects.</p>
+            <h1>Enhanced Cell Cycle Simulator</h1>
+            <p class="subtitle">Explore the fascinating process of cell division with detailed animations and interactive controls. Watch mitosis and meiosis unfold with realistic visuals.</p>
         </header>
 
         <div class="main-content">
@@ -389,14 +500,14 @@
                         <div class="nucleus" id="nucleus">
                             <div class="nucleolus"></div>
                         </div>
-                        <!-- Chromosomes will be added dynamically -->
+                        <!-- Organelles and chromosomes will be added dynamically -->
                     </div>
                 </div>
                 <div class="controls">
-                    <button class="btn" id="prevBtn">Previous Phase</button>
-                    <button class="btn" id="playBtn">Play</button>
-                    <button class="btn" id="nextBtn">Next Phase</button>
-                    <button class="btn btn-reset" id="resetBtn">Reset Simulation</button>
+                    <button class="btn" id="prevBtn"><i class="fas fa-backward"></i> Previous</button>
+                    <button class="btn" id="playBtn"><i class="fas fa-play"></i> Play</button>
+                    <button class="btn" id="nextBtn">Next <i class="fas fa-forward"></i></button>
+                    <button class="btn btn-reset" id="resetBtn"><i class="fas fa-redo"></i> Reset</button>
                 </div>
             </div>
 
@@ -442,6 +553,26 @@
                         <input type="range" min="2" max="8" value="4" step="2" class="slider" id="chromosomeSlider">
                     </div>
                 </div>
+                
+                <div class="variable-control">
+                    <div class="variable-label">
+                        <span>Temperature</span>
+                        <span id="tempValue">37°C</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="5" value="3" class="slider" id="tempSlider">
+                    </div>
+                </div>
+                
+                <div class="variable-control">
+                    <div class="variable-label">
+                        <span>Nutrient Level</span>
+                        <span id="nutrientValue">Optimal</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="5" value="3" class="slider" id="nutrientSlider">
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -449,27 +580,79 @@
             <h2 class="info-title">Phase Information</h2>
             <div class="phase-info active" id="interphaseInfo">
                 <h3 class="phase-name">Interphase</h3>
-                <p>The cell prepares for division. DNA replication occurs, and organelles are duplicated. The nucleus is clearly visible.</p>
+                <p>The cell prepares for division. DNA replication occurs, and organelles are duplicated. The nucleus is clearly visible with chromatin dispersed.</p>
             </div>
             <div class="phase-info" id="prophaseInfo">
                 <h3 class="phase-name">Prophase</h3>
-                <p>Chromosomes condense and become visible. The nuclear envelope breaks down, and spindle fibers begin to form.</p>
+                <p>Chromosomes condense and become visible. The nuclear envelope breaks down, and spindle fibers begin to form from centrosomes.</p>
             </div>
             <div class="phase-info" id="metaphaseInfo">
                 <h3 class="phase-name">Metaphase</h3>
-                <p>Chromosomes align at the cell's equator. Spindle fibers attach to the centromeres of each chromosome.</p>
+                <p>Chromosomes align at the cell's equator. Spindle fibers attach to the centromeres of each chromosome at the metaphase plate.</p>
             </div>
             <div class="phase-info" id="anaphaseInfo">
                 <h3 class="phase-name">Anaphase</h3>
-                <p>Sister chromatids separate and move to opposite poles of the cell, pulled by spindle fibers.</p>
+                <p>Sister chromatids separate and move to opposite poles of the cell, pulled by spindle fibers. Cell begins to elongate.</p>
             </div>
             <div class="phase-info" id="telophaseInfo">
                 <h3 class="phase-name">Telophase</h3>
-                <p>Chromosomes decondense. Nuclear envelopes form around the two sets of chromosomes. The cell begins to divide.</p>
+                <p>Chromosomes decondense. Nuclear envelopes form around the two sets of chromosomes. Spindle fibers disappear.</p>
             </div>
             <div class="phase-info" id="cytokinesisInfo">
                 <h3 class="phase-name">Cytokinesis</h3>
                 <p>The cytoplasm divides, forming two separate daughter cells. In animal cells, a cleavage furrow forms and pinches the cell.</p>
+            </div>
+        </div>
+
+        <div class="help-section">
+            <h2 class="help-title">How to Use This Simulator</h2>
+            <div class="help-content">
+                <h3>Navigation Controls</h3>
+                <ul>
+                    <li><strong>Previous/Next:</strong> Step through each phase of cell division</li>
+                    <li><strong>Play:</strong> Automatically cycle through all phases</li>
+                    <li><strong>Reset:</strong> Return to the beginning of the simulation</li>
+                </ul>
+                
+                <h3>Adjustable Parameters</h3>
+                <ul>
+                    <li><strong>Division Type:</strong> Switch between Mitosis and Meiosis</li>
+                    <li><strong>Chromosome Count:</strong> Set the number of chromosomes (2-8)</li>
+                    <li><strong>Animation Speed:</strong> Control how fast the animation plays</li>
+                    <li><strong>Cell Size:</strong> Change the size of the cell</li>
+                    <li><strong>Temperature:</strong> Affects the speed of cellular processes</li>
+                    <li><strong>Nutrient Level:</strong> Influences cell growth and division</li>
+                </ul>
+                
+                <h3>Understanding the Visuals</h3>
+                <p>The simulation shows a detailed animal cell with key organelles:</p>
+                
+                <div class="organelles">
+                    <div class="organelle-item">
+                        <div class="organelle-color" style="background: linear-gradient(to bottom, #4ecdc4, #1a936f);"></div>
+                        <span>Chromosomes</span>
+                    </div>
+                    <div class="organelle-item">
+                        <div class="organelle-color" style="background: radial-gradient(circle, #ff9a76, #ff6b6b);"></div>
+                        <span>Nucleus</span>
+                    </div>
+                    <div class="organelle-item">
+                        <div class="organelle-color" style="background: #ffd166;"></div>
+                        <span>Centrosomes</span>
+                    </div>
+                    <div class="organelle-item">
+                        <div class="organelle-color" style="background: linear-gradient(to right, #1a936f, #4ecdc4);"></div>
+                        <span>Mitochondria</span>
+                    </div>
+                    <div class="organelle-item">
+                        <div class="organelle-color" style="border: 2px solid #9b5de5; background: transparent;"></div>
+                        <span>Endoplasmic Reticulum</span>
+                    </div>
+                    <div class="organelle-item">
+                        <div class="organelle-color" style="background: linear-gradient(to right, #f15bb5, #fee440);"></div>
+                        <span>Golgi Apparatus</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -490,11 +673,15 @@
         const speedSlider = document.getElementById('speedSlider');
         const sizeSlider = document.getElementById('sizeSlider');
         const chromosomeSlider = document.getElementById('chromosomeSlider');
+        const tempSlider = document.getElementById('tempSlider');
+        const nutrientSlider = document.getElementById('nutrientSlider');
         const mitosisBtn = document.getElementById('mitosisBtn');
         const meiosisBtn = document.getElementById('meiosisBtn');
         const speedValue = document.getElementById('speedValue');
         const sizeValue = document.getElementById('sizeValue');
         const chromosomeValue = document.getElementById('chromosomeValue');
+        const tempValue = document.getElementById('tempValue');
+        const nutrientValue = document.getElementById('nutrientValue');
         
         // Phase information elements
         const phaseInfoElements = {
@@ -513,12 +700,63 @@
         let chromosomeCount = 4;
         let divisionType = 'mitosis';
         const phases = ['Interphase', 'Prophase', 'Metaphase', 'Anaphase', 'Telophase', 'Cytokinesis'];
+        let organelles = [];
         
         // Initialize simulation
         function initSimulation() {
+            createOrganelles();
             createChromosomes(chromosomeCount);
             updatePhaseInfo();
             updateCellSize();
+        }
+        
+        // Create organelles
+        function createOrganelles() {
+            // Clear existing organelles
+            organelles.forEach(el => el.remove());
+            organelles = [];
+            
+            // Create mitochondria (4-6)
+            const mitochondriaCount = 4 + Math.floor(Math.random() * 3);
+            for (let i = 0; i < mitochondriaCount; i++) {
+                const mitochondrion = document.createElement('div');
+                mitochondrion.className = 'mitochondrion';
+                mitochondrion.style.transform = `rotate(${Math.random() * 360}deg)`;
+                cell.appendChild(mitochondrion);
+                organelles.push(mitochondrion);
+            }
+            
+            // Create ER (1-2)
+            const erCount = 1 + Math.floor(Math.random() * 2);
+            for (let i = 0; i < erCount; i++) {
+                const er = document.createElement('div');
+                er.className = 'er';
+                cell.appendChild(er);
+                organelles.push(er);
+            }
+            
+            // Create Golgi (1-2)
+            const golgiCount = 1 + Math.floor(Math.random() * 2);
+            for (let i = 0; i < golgiCount; i++) {
+                const golgi = document.createElement('div');
+                golgi.className = 'golgi';
+                golgi.style.transform = `rotate(${Math.random() * 360}deg)`;
+                cell.appendChild(golgi);
+                organelles.push(golgi);
+            }
+            
+            // Position organelles
+            positionOrganelles();
+        }
+        
+        // Position organelles randomly
+        function positionOrganelles() {
+            organelles.forEach(organelle => {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 50 + Math.random() * 80;
+                organelle.style.left = `calc(50% + ${Math.cos(angle) * distance}px)`;
+                organelle.style.top = `calc(50% + ${Math.sin(angle) * distance}px)`;
+            });
         }
         
         // Create chromosomes
@@ -539,12 +777,14 @@
             // Create centrosomes
             const centrosome1 = document.createElement('div');
             centrosome1.className = 'centrosome';
+            centrosome1.innerHTML = '<div class="centriole"></div><div class="centriole"></div>';
             centrosome1.style.top = '30%';
             centrosome1.style.left = '30%';
             cell.appendChild(centrosome1);
             
             const centrosome2 = document.createElement('div');
             centrosome2.className = 'centrosome';
+            centrosome2.innerHTML = '<div class="centriole"></div><div class="centriole"></div>';
             centrosome2.style.top = '70%';
             centrosome2.style.left = '70%';
             cell.appendChild(centrosome2);
@@ -561,6 +801,10 @@
             
             // Clear existing spindles
             spindles.forEach(spindle => spindle.remove());
+            
+            // Position organelles based on phase
+            positionOrganelles();
+            updateOrganelleVisibility();
             
             switch(phases[currentPhaseIndex]) {
                 case 'Interphase':
@@ -588,14 +832,17 @@
                         chromosome.style.opacity = '1';
                     });
                     nucleus.style.opacity = '0.3';
-                    centrosomes.forEach(centrosome => centrosome.style.opacity = '1');
+                    centrosomes.forEach(centrosome => {
+                        centrosome.style.opacity = '1';
+                        centrosome.style.transform = 'scale(1)';
+                    });
                     break;
                     
                 case 'Metaphase':
                     // Chromosomes aligning at equator
                     chromosomes.forEach((chromosome, i) => {
                         const angle = (i / chromosomeCount) * Math.PI * 2;
-                        const distance = 80;
+                        const distance = 100;
                         chromosome.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) rotate(0deg)`;
                         chromosome.style.width = '15px';
                         chromosome.style.height = '60px';
@@ -618,14 +865,17 @@
                         cell.appendChild(spindle2);
                     });
                     nucleus.style.opacity = '0';
-                    centrosomes.forEach(centrosome => centrosome.style.opacity = '1');
+                    centrosomes.forEach(centrosome => {
+                        centrosome.style.opacity = '1';
+                        centrosome.style.transform = 'scale(1.2)';
+                    });
                     break;
                     
                 case 'Anaphase':
                     // Chromosomes moving to opposite poles
                     chromosomes.forEach((chromosome, i) => {
                         const centrosomeIndex = i % 2;
-                        const distance = 80;
+                        const distance = 100;
                         const centrosome = centrosomes[centrosomeIndex];
                         const rect = centrosome.getBoundingClientRect();
                         const cellRect = cell.getBoundingClientRect();
@@ -645,7 +895,13 @@
                         cell.appendChild(spindle);
                     });
                     nucleus.style.opacity = '0';
-                    centrosomes.forEach(centrosome => centrosome.style.opacity = '1');
+                    centrosomes.forEach(centrosome => {
+                        centrosome.style.opacity = '1';
+                        centrosome.style.transform = 'scale(1.3)';
+                    });
+                    
+                    // Stretch cell
+                    cell.style.transform = 'scale(1.2, 1)';
                     break;
                     
                 case 'Telophase':
@@ -668,6 +924,27 @@
                     });
                     nucleus.style.opacity = '0';
                     centrosomes.forEach(centrosome => centrosome.style.opacity = '1');
+                    
+                    // Form two nuclei
+                    const newNucleus1 = document.createElement('div');
+                    newNucleus1.className = 'nucleus';
+                    newNucleus1.style.width = '60px';
+                    newNucleus1.style.height = '60px';
+                    newNucleus1.style.left = '25%';
+                    newNucleus1.style.top = '50%';
+                    newNucleus1.style.transform = 'translate(-50%, -50%)';
+                    newNucleus1.innerHTML = '<div class="nucleolus"></div>';
+                    cell.appendChild(newNucleus1);
+                    
+                    const newNucleus2 = document.createElement('div');
+                    newNucleus2.className = 'nucleus';
+                    newNucleus2.style.width = '60px';
+                    newNucleus2.style.height = '60px';
+                    newNucleus2.style.left = '75%';
+                    newNucleus2.style.top = '50%';
+                    newNucleus2.style.transform = 'translate(-50%, -50%)';
+                    newNucleus2.innerHTML = '<div class="nucleolus"></div>';
+                    cell.appendChild(newNucleus2);
                     break;
                     
                 case 'Cytokinesis':
@@ -677,14 +954,51 @@
                     
                     // Position chromosomes in daughter cells
                     chromosomes.forEach((chromosome, i) => {
-                        const offsetX = i < chromosomeCount/2 ? -30 : 30;
+                        const offsetX = i < chromosomeCount/2 ? -40 : 40;
                         const offsetY = (i % (chromosomeCount/2)) * 30 - 30;
                         chromosome.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(0deg)`;
                     });
                     nucleus.style.opacity = '0';
                     centrosomes.forEach(centrosome => centrosome.style.opacity = '0');
+                    
+                    // Create two new cells
+                    setTimeout(() => {
+                        cell.style.width = '140px';
+                        cell.style.height = '140px';
+                        cell.style.margin = '0 20px';
+                        cell.style.display = 'inline-block';
+                        cell.style.borderRadius = '50%';
+                        cell.style.transform = 'scale(1)';
+                        
+                        const cellContainer = document.querySelector('.cell-container');
+                        const cell2 = cell.cloneNode(true);
+                        cell2.id = 'cell2';
+                        cellContainer.appendChild(cell2);
+                        
+                        // Position the two cells
+                        cell.style.left = '35%';
+                        cell2.style.left = '65%';
+                        
+                        // Reset after showing two cells
+                        setTimeout(() => {
+                            resetSimulation();
+                        }, 3000);
+                    }, 1000);
                     break;
             }
+        }
+        
+        // Update organelle visibility based on phase
+        function updateOrganelleVisibility() {
+            const phase = phases[currentPhaseIndex];
+            
+            organelles.forEach(organelle => {
+                if (phase === 'Interphase' || phase === 'Prophase') {
+                    organelle.style.opacity = '0.7';
+                } else {
+                    organelle.style.opacity = '0';
+                }
+            });
         }
         
         // Update phase information display
@@ -694,7 +1008,9 @@
             
             // Show current phase info
             const currentPhase = phases[currentPhaseIndex];
-            phaseInfoElements[currentPhase].classList.add('active');
+            if (phaseInfoElements[currentPhase]) {
+                phaseInfoElements[currentPhase].classList.add('active');
+            }
             
             // Update phase display
             phaseDisplay.textContent = currentPhase;
@@ -720,11 +1036,11 @@
             isPlaying = !isPlaying;
             
             if (isPlaying) {
-                playBtn.textContent = 'Pause';
+                playBtn.innerHTML = '<i class="fas fa-pause"></i> Pause';
                 const speed = 3000 / speedSlider.value;
                 playInterval = setInterval(nextPhase, speed);
             } else {
-                playBtn.textContent = 'Play';
+                playBtn.innerHTML = '<i class="fas fa-play"></i> Play';
                 clearInterval(playInterval);
             }
         }
@@ -734,9 +1050,26 @@
             currentPhaseIndex = 0;
             isPlaying = false;
             clearInterval(playInterval);
-            playBtn.textContent = 'Play';
+            playBtn.innerHTML = '<i class="fas fa-play"></i> Play';
             cell.style.borderRadius = '50%';
             cell.style.transform = 'scale(1)';
+            cell.style.width = '280px';
+            cell.style.height = '280px';
+            cell.style.margin = '0';
+            cell.style.display = 'flex';
+            cell.style.left = '50%';
+            
+            // Remove cloned cell if exists
+            const cell2 = document.getElementById('cell2');
+            if (cell2) cell2.remove();
+            
+            // Remove extra nuclei
+            document.querySelectorAll('.nucleus').forEach((nuc, index) => {
+                if (index > 0) nuc.remove();
+            });
+            
+            createOrganelles();
+            createChromosomes(chromosomeCount);
             updatePhaseInfo();
         }
         
@@ -746,12 +1079,12 @@
             let size;
             
             switch(sizeValue) {
-                case '1': size = 180; break;
-                case '2': size = 220; break;
-                case '3': size = 250; break;
-                case '4': size = 280; break;
-                case '5': size = 320; break;
-                default: size = 250;
+                case '1': size = 200; break;
+                case '2': size = 240; break;
+                case '3': size = 280; break;
+                case '4': size = 320; break;
+                case '5': size = 360; break;
+                default: size = 280;
             }
             
             cell.style.width = size + 'px';
@@ -785,6 +1118,34 @@
             updatePhaseInfo();
         }
         
+        // Update temperature
+        function updateTemperature() {
+            const tempValue = tempSlider.value;
+            const tempLabels = ['20°C', '25°C', '37°C', '40°C', '45°C'];
+            document.getElementById('tempValue').textContent = tempLabels[tempValue - 1];
+            
+            // Adjust animation speed based on temperature
+            const speedFactor = [0.7, 0.85, 1.0, 1.2, 1.4][tempValue - 1];
+            if (isPlaying) {
+                clearInterval(playInterval);
+                const baseSpeed = 3000 / speedSlider.value;
+                playInterval = setInterval(nextPhase, baseSpeed / speedFactor);
+            }
+        }
+        
+        // Update nutrients
+        function updateNutrients() {
+            const nutrientValue = nutrientSlider.value;
+            const nutrientLabels = ['Low', 'Moderate', 'Optimal', 'High', 'Excess'];
+            document.getElementById('nutrientValue').textContent = nutrientLabels[nutrientValue - 1];
+            
+            // Adjust cell size based on nutrients
+            const sizeFactor = [0.8, 0.9, 1.0, 1.1, 1.2][nutrientValue - 1];
+            const baseSize = [200, 240, 280, 320, 360][sizeSlider.value - 1];
+            cell.style.width = baseSize * sizeFactor + 'px';
+            cell.style.height = baseSize * sizeFactor + 'px';
+        }
+        
         // Set division type
         function setDivisionType(type) {
             divisionType = type;
@@ -801,6 +1162,8 @@
         speedSlider.addEventListener('input', updateSpeed);
         sizeSlider.addEventListener('input', updateCellSize);
         chromosomeSlider.addEventListener('input', updateChromosomeCount);
+        tempSlider.addEventListener('input', updateTemperature);
+        nutrientSlider.addEventListener('input', updateNutrients);
         mitosisBtn.addEventListener('click', () => setDivisionType('mitosis'));
         meiosisBtn.addEventListener('click', () => setDivisionType('meiosis'));
         
