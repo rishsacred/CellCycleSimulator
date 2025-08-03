@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cell Cycle Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .simulation-area {
+            flex: 3;
+            min-width: 300px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .simulation-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            color: #ffd166;
+        }
+
+        .cell-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: rgba(25, 40, 65, 0.7);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cell-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, #2a4d7a 0%, #0f1a30 100%);
+            opacity: 0.7;
+            z-index: 1;
+        }
+
+        .cell {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, #f5f5f5, #dcdcdc);
+            border-radius: 50%;
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
+            z-index: 2;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.5s ease;
+        }
+
+        .nucleus {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #ff9a76, #ff6b6b);
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+            z-index: 3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.8s ease;
+        }
+
+        .nucleolus {
+            width: 25px;
+            height: 25px;
+            background: #ffd166;
+            border-radius: 50%;
+        }
+
+        .chromosome {
+            position: absolute;
+            width: 20px;
+            height: 60px;
+            background: linear-gradient(to bottom, #4ecdc4, #1a936f);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+            z-index: 4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .centromere {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #ff6b6b;
+            border-radius: 50%;
+        }
+
+        .spindle {
+            position: absolute;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.7);
+            transform-origin: left center;
+            z-index: 3;
+        }
+
+        .centrosome {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: #ffd166;
+            border-radius: 50%;
+            z-index: 4;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-reset {
+            background: linear-gradient(to right, #4ecdc4, #1a936f);
+        }
+
+        .phase-display {
+            text-align: center;
+            font-size: 1.4rem;
+            margin: 15px 0;
+            height: 30px;
+            color: #ffd166;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .variables-panel {
+            flex: 2;
+            min-width: 300px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .panel-title {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            color: #ffd166;
+        }
+
+        .variable-control {
+            margin-bottom: 25px;
+        }
+
+        .variable-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .slider-container {
+            width: 100%;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 5px;
+            position: relative;
+        }
+
+        .slider {
+            width: 100%;
+            height: 20px;
+            -webkit-appearance: none;
+            background: linear-gradient(to right, #4ecdc4, #1a936f);
+            border-radius: 10px;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #ffd166;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .toggle-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn.active {
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            border-color: #ffd166;
+            box-shadow: 0 0 15px rgba(255, 209, 102, 0.5);
+        }
+
+        .info-section {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .info-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            color: #ffd166;
+        }
+
+        .phase-info {
+            display: none;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin-bottom: 15px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .phase-info.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .phase-name {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: #4ecdc4;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .btn {
+                min-width: 100px;
+                padding: 10px 15px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Cell Cycle Simulator</h1>
+            <p class="subtitle">Explore the fascinating process of cell division with this interactive simulator. Watch mitosis and meiosis unfold with smooth animations and adjust variables to see their effects.</p>
+        </header>
+
+        <div class="main-content">
+            <div class="simulation-area">
+                <h2 class="simulation-title">Cell Division Visualization</h2>
+                <div class="phase-display" id="phaseDisplay">Interphase</div>
+                <div class="cell-container">
+                    <div class="cell-background"></div>
+                    <div class="cell" id="cell">
+                        <div class="nucleus" id="nucleus">
+                            <div class="nucleolus"></div>
+                        </div>
+                        <!-- Chromosomes will be added dynamically -->
+                    </div>
+                </div>
+                <div class="controls">
+                    <button class="btn" id="prevBtn">Previous Phase</button>
+                    <button class="btn" id="playBtn">Play</button>
+                    <button class="btn" id="nextBtn">Next Phase</button>
+                    <button class="btn btn-reset" id="resetBtn">Reset Simulation</button>
+                </div>
+            </div>
+
+            <div class="variables-panel">
+                <h2 class="panel-title">Simulation Controls</h2>
+                
+                <div class="variable-control">
+                    <div class="variable-label">
+                        <span>Animation Speed</span>
+                        <span id="speedValue">Normal</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="5" value="3" class="slider" id="speedSlider">
+                    </div>
+                </div>
+                
+                <div class="variable-control">
+                    <div class="variable-label">
+                        <span>Cell Size</span>
+                        <span id="sizeValue">Normal</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="5" value="3" class="slider" id="sizeSlider">
+                    </div>
+                </div>
+                
+                <div class="variable-control">
+                    <div class="variable-label">
+                        <span>Division Type</span>
+                    </div>
+                    <div class="toggle-container">
+                        <div class="toggle-btn active" id="mitosisBtn">Mitosis</div>
+                        <div class="toggle-btn" id="meiosisBtn">Meiosis</div>
+                    </div>
+                </div>
+                
+                <div class="variable-control">
+                    <div class="variable-label">
+                        <span>Chromosome Count</span>
+                        <span id="chromosomeValue">4</span>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" min="2" max="8" value="4" step="2" class="slider" id="chromosomeSlider">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2 class="info-title">Phase Information</h2>
+            <div class="phase-info active" id="interphaseInfo">
+                <h3 class="phase-name">Interphase</h3>
+                <p>The cell prepares for division. DNA replication occurs, and organelles are duplicated. The nucleus is clearly visible.</p>
+            </div>
+            <div class="phase-info" id="prophaseInfo">
+                <h3 class="phase-name">Prophase</h3>
+                <p>Chromosomes condense and become visible. The nuclear envelope breaks down, and spindle fibers begin to form.</p>
+            </div>
+            <div class="phase-info" id="metaphaseInfo">
+                <h3 class="phase-name">Metaphase</h3>
+                <p>Chromosomes align at the cell's equator. Spindle fibers attach to the centromeres of each chromosome.</p>
+            </div>
+            <div class="phase-info" id="anaphaseInfo">
+                <h3 class="phase-name">Anaphase</h3>
+                <p>Sister chromatids separate and move to opposite poles of the cell, pulled by spindle fibers.</p>
+            </div>
+            <div class="phase-info" id="telophaseInfo">
+                <h3 class="phase-name">Telophase</h3>
+                <p>Chromosomes decondense. Nuclear envelopes form around the two sets of chromosomes. The cell begins to divide.</p>
+            </div>
+            <div class="phase-info" id="cytokinesisInfo">
+                <h3 class="phase-name">Cytokinesis</h3>
+                <p>The cytoplasm divides, forming two separate daughter cells. In animal cells, a cleavage furrow forms and pinches the cell.</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>Cell Cycle Simulator | Created with HTML, CSS, and JavaScript | Biology Education Tool</p>
+        </footer>
+    </div>
+
+    <script>
+        // DOM elements
+        const cell = document.getElementById('cell');
+        const nucleus = document.getElementById('nucleus');
+        const phaseDisplay = document.getElementById('phaseDisplay');
+        const prevBtn = document.getElementById('prevBtn');
+        const playBtn = document.getElementById('playBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const speedSlider = document.getElementById('speedSlider');
+        const sizeSlider = document.getElementById('sizeSlider');
+        const chromosomeSlider = document.getElementById('chromosomeSlider');
+        const mitosisBtn = document.getElementById('mitosisBtn');
+        const meiosisBtn = document.getElementById('meiosisBtn');
+        const speedValue = document.getElementById('speedValue');
+        const sizeValue = document.getElementById('sizeValue');
+        const chromosomeValue = document.getElementById('chromosomeValue');
+        
+        // Phase information elements
+        const phaseInfoElements = {
+            'Interphase': document.getElementById('interphaseInfo'),
+            'Prophase': document.getElementById('prophaseInfo'),
+            'Metaphase': document.getElementById('metaphaseInfo'),
+            'Anaphase': document.getElementById('anaphaseInfo'),
+            'Telophase': document.getElementById('telophaseInfo'),
+            'Cytokinesis': document.getElementById('cytokinesisInfo')
+        };
+        
+        // Simulation state
+        let currentPhaseIndex = 0;
+        let isPlaying = false;
+        let playInterval;
+        let chromosomeCount = 4;
+        let divisionType = 'mitosis';
+        const phases = ['Interphase', 'Prophase', 'Metaphase', 'Anaphase', 'Telophase', 'Cytokinesis'];
+        
+        // Initialize simulation
+        function initSimulation() {
+            createChromosomes(chromosomeCount);
+            updatePhaseInfo();
+            updateCellSize();
+        }
+        
+        // Create chromosomes
+        function createChromosomes(count) {
+            // Clear existing chromosomes
+            document.querySelectorAll('.chromosome').forEach(el => el.remove());
+            document.querySelectorAll('.spindle').forEach(el => el.remove());
+            document.querySelectorAll('.centrosome').forEach(el => el.remove());
+            
+            // Create new chromosomes
+            for (let i = 0; i < count; i++) {
+                const chromosome = document.createElement('div');
+                chromosome.className = 'chromosome';
+                chromosome.innerHTML = '<div class="centromere"></div>';
+                cell.appendChild(chromosome);
+            }
+            
+            // Create centrosomes
+            const centrosome1 = document.createElement('div');
+            centrosome1.className = 'centrosome';
+            centrosome1.style.top = '30%';
+            centrosome1.style.left = '30%';
+            cell.appendChild(centrosome1);
+            
+            const centrosome2 = document.createElement('div');
+            centrosome2.className = 'centrosome';
+            centrosome2.style.top = '70%';
+            centrosome2.style.left = '70%';
+            cell.appendChild(centrosome2);
+            
+            // Position chromosomes based on current phase
+            updateChromosomePositions();
+        }
+        
+        // Update chromosome positions based on current phase
+        function updateChromosomePositions() {
+            const chromosomes = document.querySelectorAll('.chromosome');
+            const centrosomes = document.querySelectorAll('.centrosome');
+            const spindles = document.querySelectorAll('.spindle');
+            
+            // Clear existing spindles
+            spindles.forEach(spindle => spindle.remove());
+            
+            switch(phases[currentPhaseIndex]) {
+                case 'Interphase':
+                    // Chromosomes randomly positioned in nucleus
+                    chromosomes.forEach((chromosome, i) => {
+                        const angle = (i / chromosomeCount) * Math.PI * 2;
+                        const distance = 30;
+                        chromosome.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) rotate(0deg)`;
+                        chromosome.style.width = '15px';
+                        chromosome.style.height = '40px';
+                        chromosome.style.opacity = '0.6';
+                    });
+                    nucleus.style.opacity = '1';
+                    centrosomes.forEach(centrosome => centrosome.style.opacity = '0');
+                    break;
+                    
+                case 'Prophase':
+                    // Chromosomes condensing and moving away from center
+                    chromosomes.forEach((chromosome, i) => {
+                        const angle = (i / chromosomeCount) * Math.PI * 2;
+                        const distance = 60;
+                        chromosome.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) rotate(${i * 45}deg)`;
+                        chromosome.style.width = '20px';
+                        chromosome.style.height = '60px';
+                        chromosome.style.opacity = '1';
+                    });
+                    nucleus.style.opacity = '0.3';
+                    centrosomes.forEach(centrosome => centrosome.style.opacity = '1');
+                    break;
+                    
+                case 'Metaphase':
+                    // Chromosomes aligning at equator
+                    chromosomes.forEach((chromosome, i) => {
+                        const angle = (i / chromosomeCount) * Math.PI * 2;
+                        const distance = 80;
+                        chromosome.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) rotate(0deg)`;
+                        chromosome.style.width = '15px';
+                        chromosome.style.height = '60px';
+                        
+                        // Create spindle fibers
+                        const spindle1 = document.createElement('div');
+                        spindle1.className = 'spindle';
+                        spindle1.style.top = '50%';
+                        spindle1.style.left = '50%';
+                        spindle1.style.width = distance + 'px';
+                        spindle1.style.transform = `rotate(${angle}rad)`;
+                        cell.appendChild(spindle1);
+                        
+                        const spindle2 = document.createElement('div');
+                        spindle2.className = 'spindle';
+                        spindle2.style.top = '50%';
+                        spindle2.style.left = '50%';
+                        spindle2.style.width = distance + 'px';
+                        spindle2.style.transform = `rotate(${angle + Math.PI}rad)`;
+                        cell.appendChild(spindle2);
+                    });
+                    nucleus.style.opacity = '0';
+                    centrosomes.forEach(centrosome => centrosome.style.opacity = '1');
+                    break;
+                    
+                case 'Anaphase':
+                    // Chromosomes moving to opposite poles
+                    chromosomes.forEach((chromosome, i) => {
+                        const centrosomeIndex = i % 2;
+                        const distance = 80;
+                        const centrosome = centrosomes[centrosomeIndex];
+                        const rect = centrosome.getBoundingClientRect();
+                        const cellRect = cell.getBoundingClientRect();
+                        
+                        const offsetX = rect.left + rect.width/2 - cellRect.left - cellRect.width/2;
+                        const offsetY = rect.top + rect.height/2 - cellRect.top - cellRect.height/2;
+                        
+                        chromosome.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(0deg)`;
+                        
+                        // Create spindle fibers
+                        const spindle = document.createElement('div');
+                        spindle.className = 'spindle';
+                        spindle.style.top = '50%';
+                        spindle.style.left = '50%';
+                        spindle.style.width = `${Math.sqrt(offsetX*offsetX + offsetY*offsetY)}px`;
+                        spindle.style.transform = `rotate(${Math.atan2(offsetY, offsetX)}rad)`;
+                        cell.appendChild(spindle);
+                    });
+                    nucleus.style.opacity = '0';
+                    centrosomes.forEach(centrosome => centrosome.style.opacity = '1');
+                    break;
+                    
+                case 'Telophase':
+                    // Chromosomes grouping at poles and nuclei forming
+                    chromosomes.forEach((chromosome, i) => {
+                        const centrosomeIndex = i % 2;
+                        const distance = 40;
+                        const centrosome = centrosomes[centrosomeIndex];
+                        const rect = centrosome.getBoundingClientRect();
+                        const cellRect = cell.getBoundingClientRect();
+                        
+                        const offsetX = rect.left + rect.width/2 - cellRect.left - cellRect.width/2;
+                        const offsetY = rect.top + rect.height/2 - cellRect.top - cellRect.height/2;
+                        
+                        const angle = (i / (chromosomeCount/2)) * Math.PI * 2;
+                        const groupOffsetX = Math.cos(angle) * distance;
+                        const groupOffsetY = Math.sin(angle) * distance;
+                        
+                        chromosome.style.transform = `translate(${offsetX + groupOffsetX}px, ${offsetY + groupOffsetY}px) rotate(0deg)`;
+                    });
+                    nucleus.style.opacity = '0';
+                    centrosomes.forEach(centrosome => centrosome.style.opacity = '1');
+                    break;
+                    
+                case 'Cytokinesis':
+                    // Cell dividing into two
+                    cell.style.borderRadius = '50% 50% 0 0 / 100% 100% 0 0';
+                    cell.style.transform = 'scaleX(0.5)';
+                    
+                    // Position chromosomes in daughter cells
+                    chromosomes.forEach((chromosome, i) => {
+                        const offsetX = i < chromosomeCount/2 ? -30 : 30;
+                        const offsetY = (i % (chromosomeCount/2)) * 30 - 30;
+                        chromosome.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(0deg)`;
+                    });
+                    nucleus.style.opacity = '0';
+                    centrosomes.forEach(centrosome => centrosome.style.opacity = '0');
+                    break;
+            }
+        }
+        
+        // Update phase information display
+        function updatePhaseInfo() {
+            // Hide all info boxes
+            Object.values(phaseInfoElements).forEach(el => el.classList.remove('active'));
+            
+            // Show current phase info
+            const currentPhase = phases[currentPhaseIndex];
+            phaseInfoElements[currentPhase].classList.add('active');
+            
+            // Update phase display
+            phaseDisplay.textContent = currentPhase;
+            
+            // Update chromosome positions
+            updateChromosomePositions();
+        }
+        
+        // Go to next phase
+        function nextPhase() {
+            currentPhaseIndex = (currentPhaseIndex + 1) % phases.length;
+            updatePhaseInfo();
+        }
+        
+        // Go to previous phase
+        function prevPhase() {
+            currentPhaseIndex = (currentPhaseIndex - 1 + phases.length) % phases.length;
+            updatePhaseInfo();
+        }
+        
+        // Play/pause animation
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            
+            if (isPlaying) {
+                playBtn.textContent = 'Pause';
+                const speed = 3000 / speedSlider.value;
+                playInterval = setInterval(nextPhase, speed);
+            } else {
+                playBtn.textContent = 'Play';
+                clearInterval(playInterval);
+            }
+        }
+        
+        // Reset simulation
+        function resetSimulation() {
+            currentPhaseIndex = 0;
+            isPlaying = false;
+            clearInterval(playInterval);
+            playBtn.textContent = 'Play';
+            cell.style.borderRadius = '50%';
+            cell.style.transform = 'scale(1)';
+            updatePhaseInfo();
+        }
+        
+        // Update cell size based on slider
+        function updateCellSize() {
+            const sizeValue = sizeSlider.value;
+            let size;
+            
+            switch(sizeValue) {
+                case '1': size = 180; break;
+                case '2': size = 220; break;
+                case '3': size = 250; break;
+                case '4': size = 280; break;
+                case '5': size = 320; break;
+                default: size = 250;
+            }
+            
+            cell.style.width = size + 'px';
+            cell.style.height = size + 'px';
+            
+            // Update size display
+            const sizeLabels = ['Small', 'Below Normal', 'Normal', 'Above Normal', 'Large'];
+            document.getElementById('sizeValue').textContent = sizeLabels[sizeValue - 1];
+        }
+        
+        // Update animation speed
+        function updateSpeed() {
+            const speedValue = speedSlider.value;
+            
+            if (isPlaying) {
+                clearInterval(playInterval);
+                const speed = 3000 / speedValue;
+                playInterval = setInterval(nextPhase, speed);
+            }
+            
+            // Update speed display
+            const speedLabels = ['Very Slow', 'Slow', 'Normal', 'Fast', 'Very Fast'];
+            document.getElementById('speedValue').textContent = speedLabels[speedValue - 1];
+        }
+        
+        // Update chromosome count
+        function updateChromosomeCount() {
+            chromosomeCount = chromosomeSlider.value;
+            chromosomeValue.textContent = chromosomeCount;
+            createChromosomes(chromosomeCount);
+            updatePhaseInfo();
+        }
+        
+        // Set division type
+        function setDivisionType(type) {
+            divisionType = type;
+            mitosisBtn.classList.toggle('active', type === 'mitosis');
+            meiosisBtn.classList.toggle('active', type === 'meiosis');
+            resetSimulation();
+        }
+        
+        // Event listeners
+        prevBtn.addEventListener('click', prevPhase);
+        nextBtn.addEventListener('click', nextPhase);
+        playBtn.addEventListener('click', togglePlay);
+        resetBtn.addEventListener('click', resetSimulation);
+        speedSlider.addEventListener('input', updateSpeed);
+        sizeSlider.addEventListener('input', updateCellSize);
+        chromosomeSlider.addEventListener('input', updateChromosomeCount);
+        mitosisBtn.addEventListener('click', () => setDivisionType('mitosis'));
+        meiosisBtn.addEventListener('click', () => setDivisionType('meiosis'));
+        
+        // Initialize the simulation
+        window.addEventListener('load', initSimulation);
+    </script>
+</body>
+</html>
